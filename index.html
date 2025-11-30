@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DF703 Smart Bin Sensor Controller</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --accent-color: #ff6b6b;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .controls-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .controls-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .control-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+            direction: rtl;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .copy-btn {
+            background-color: var(--accent-color);
+            margin-left: 10px;
+        }
+
+        .copy-btn:hover {
+            background-color: #ff5252;
+        }
+
+        .command-display {
+            background-color: var(--light-color);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            word-break: break-all;
+            position: relative;
+        }
+
+        .command-display h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .command-value {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .command-hex {
+            font-weight: bold;
+            color: #d63384;
+            margin-top: 5px;
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>DF703 Smart Bin Sensor Controller</h1>
+            <p class="description">أداة ويب للتحكم في إعدادات جهاز DF703 Smart Bin Sensor</p>
+        </header>
+
+        <div class="controls-container">
+            <!-- قسم إعدادات الوقت -->
+            <div class="control-section">
+                <h2 class="section-title">إعدادات الوقت</h2>
+
+                <div class="form-group">
+                    <label for="uploadInterval">فترة الرفع الدوري (بالساعات):</label>
+                    <input type="number" id="uploadInterval" min="1" max="168" >
+                    <div class="hint">النطاق المسموح: 1-168 ساعة (القيمة الافتراضية: 24 ساعة)</div>
+                    <button onclick="generateUploadIntervalCommand()">إنشاء الأمر</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="detectionInterval">وقت الكشف الدوري (بالدقائق):</label>
+                    <input type="number" id="detectionInterval" min="1" max="60" >
+                    <div class="hint">النطاق المسموح: 1-60 دقيقة (القيمة الافتراضية: 10 دقائق)</div>
+                    <button onclick="generateDetectionIntervalCommand()">إنشاء الأمر</button>
+                </div>
+            </div>
+
+            <!-- قسم إعدادات الإنذار -->
+            <div class="control-section">
+                <h2 class="section-title">إعدادات الإنذار</h2>
+
+                <div class="form-group">
+                    <label for="fullThreshold">حد إنذار الامتلاء (بالسم):</label>
+                    <input type="number" id="fullThreshold" min="15" max="255" >
+                    <div class="hint">النطاق المسموح: 15-255 سم (القيمة الافتراضية: 30 سم)</div>
+                    <button onclick="generateFullThresholdCommand()">إنشاء الأمر</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="fireThreshold">حد إنذار الحريق (بالدرجة المئوية):</label>
+                    <input type="number" id="fireThreshold" min="1" max="255" >
+                    <div class="hint">النطاق المسموح: 1-255 درجة مئوية (القيمة الافتراضية: 75 درجة)</div>
+                    <button onclick="generateFireThresholdCommand()">إنشاء الأمر</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="fallThreshold">حد إنذار السقوط (بالدرجات):</label>
+                    <input type="number" id="fallThreshold" min="15" max="90" >
+                    <div class="hint">النطاق المسموح: 15-90 درجة (القيمة الافتراضية: 20 درجة)</div>
+                    <button onclick="generateFallThresholdCommand()">إنشاء الأمر</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="batteryThreshold">حد إنذار البطارية (بالنسبة المئوية):</label>
+                    <input type="number" id="batteryThreshold" min="5" max="99" >
+                    <div class="hint">النطاق المسموح: 5-99% (القيمة الافتراضية: 20%)</div>
+                    <button onclick="generateBatteryThresholdCommand()">إنشاء الأمر</button>
+                </div>
+            </div>
+
+            <!-- قسم إعدادات الخادم والشبكة -->
+            <div class="control-section">
+                <h2 class="section-title">إعدادات الخادم والشبكة</h2>
+
+                <div class="form-group">
+                    <label for="serverAddress">عنوان الخادم (IP:Port):</label>
+                    <input type="text" id="serverAddress" placeholder="156.23.68.110;5000;" >
+                    <div class="hint">التنسيق: IP;PORT; - يجب أن يحتوي على فاصلة منقوطة في النهاية</div>
+                    <button onclick="generateServerAddressCommand()">إنشاء الأمر</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="apnSettings">إعدادات APN (APN;Username;Password;):</label>
+                    <input type="text" id="apnSettings" placeholder="internet;;;" >
+                    <div class="hint">التنسيق: APN;USERNAME;PASSWORD; - استخدم فاصلة منقوطة فارغة إذا لم يكن هناك اسم
+                        مستخدم أو كلمة مرور</div>
+                    <button onclick="generateAPNCommand()">إنشاء الأمر</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="mqttSettings">إعدادات MQTT (ClientID;PubTopic;SubTopic;Username;Password;):</label>
+                    <input type="text" id="mqttSettings" placeholder="1860123456789;DF702/UP;DF702/Down;Dingtek;123;" >
+                    <div class="hint">التنسيق: ClientID;PublishTopic;SubscribeTopic;Username;Password; - ClientID وكلمة
+                        المرور بحد أقصى 70 بايت، المواضيع واسم المستخدم بحد أقصى 50 بايت</div>
+                    <button onclick="generateMQTTCommand()">إنشاء الأمر</button>
+                </div>
+            </div>
+
+            <!-- قسم إعدادات الوظائف -->
+            <div class="control-section">
+                <h2 class="section-title">إعدادات الوظائف</h2>
+
+                <div class="form-group">
+                    <label for="functionSelect">اختر الوظيفة:</label>
+                    <select id="functionSelect">
+                        <option value="0B">تشغيل صدى المنفذ التسلسلي</option>
+                        <option value="0C">إيقاف صدى المنفذ التسلسلي</option>
+                        <option value="0A">تشغيل وظيفة السقوط</option>
+                        <option value="09">إيقاف وظيفة السقوط</option>
+                        <option value="01">تشغيل وظيفة GPS</option>
+                        <option value="00">إيقاف وظيفة GPS</option>
+                        <option value="05">وضع العمل العادي (0)</option>
+                        <option value="06">إيقاف وظيفة الكشف (1)</option>
+                        <option value="0E">وضع العرض التوضيحي (2)</option>
+                        <option value="02">إعادة تشغيل المستشعر</option>
+                    </select>
+                    <div class="hint">
+                        <strong>تفسير الوظائف:</strong><br>
+                        • <strong>صدى المنفذ التسلسلي</strong>: عرض الأوامر المرسلة عبر المنفذ التسلسلي<br>
+                        • <strong>وظيفة السقوط</strong>: كشف إذا تم إمالة أو قلب الحاوية<br>
+                        • <strong>وظيفة GPS</strong>: تحديد الموقع الجغرافي للحاوية<br>
+                        • <strong>وضع العمل العادي</strong>: التشغيل القياسي مع فترات السكون<br>
+                        • <strong>إيقاف الكشف</strong>: إيقاف عمليات الكشف لتوفير الطاقة<br>
+                        • <strong>وضع العرض التوضيحي</strong>: التشغيل المستمر بدون سكون (يستهلك طاقة أكثر)<br>
+                        • <strong>إعادة التشغيل</strong>: إعادة تشغيل الجهاز
+                    </div>
+                    <button onclick="generateFunctionCommand()">إنشاء الأمر</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم عرض الأمر -->
+        <div class="control-section">
+            <h2 class="section-title">الأمر الناتج</h2>
+            <div class="command-display">
+                <h3>الأمر:</h3>
+                <div class="command-value" id="commandOutput">سيظهر الأمر هنا بعد إنشائه</div>
+                <div id="commandHex" class="command-hex"></div>
+                <button class="copy-btn" onclick="copyCommand()">نسخ الأمر</button>
+                <div class="alert alert-success" id="copyAlert">تم نسخ الأمر بنجاح!</div>
+            </div>
+        </div>
+
+        <footer>
+            <p>DF703 Smart Bin Sensor Controller - V2.0</p>
+            <p>يجب توصيل الجهاز بالكمبيوتر عبر المنفذ التسلسلي لتطبيق الأوامر</p>
+        </footer>
+    </div>
+
+    <script>
+        // متغير لحفظ الأمر الحالي
+        let currentCommand = '';
+
+        // دالة لتحويل الرقم إلى صيغة hex مكونة من خانتين
+        function toHex(value) {
+            let hex = parseInt(value).toString(16).toUpperCase();
+            return hex.length === 1 ? '0' + hex : hex;
+        }
+
+        // دوال إنشاء الأوامر المختلفة
+        function generateUploadIntervalCommand() {
+            const value = document.getElementById('uploadInterval').value;
+            if (value < 1 || value > 168) {
+                alert("فترة الرفع الدوري يجب أن تكون بين 1 و 168 ساعة");
+                return;
+            }
+            const hexValue = toHex(value);
+            currentCommand = `8002999901${hexValue}81`;
+            displayCommand(currentCommand, `تغيير فترة الرفع الدوري إلى ${value} ساعة`);
+        }
+
+        function generateDetectionIntervalCommand() {
+            const value = document.getElementById('detectionInterval').value;
+            if (value < 1 || value > 60) {
+                alert("وقت الكشف الدوري يجب أن يكون بين 1 و 60 دقيقة");
+                return;
+            }
+            const hexValue = toHex(value);
+            currentCommand = `8002999908${hexValue}81`;
+            displayCommand(currentCommand, `تغيير وقت الكشف الدوري إلى ${value} دقيقة`);
+        }
+
+        function generateFullThresholdCommand() {
+            const value = document.getElementById('fullThreshold').value;
+            if (value < 15 || value > 255) {
+                alert("حد إنذار الامتلاء يجب أن يكون بين 15 و 255 سم");
+                return;
+            }
+            const hexValue = toHex(value);
+            currentCommand = `8002999902${hexValue}81`;
+            displayCommand(currentCommand, `تغيير حد إنذار الامتلاء إلى ${value} سم`);
+        }
+
+        function generateFireThresholdCommand() {
+            const value = document.getElementById('fireThreshold').value;
+            if (value < 1 || value > 255) {
+                alert("حد إنذار الحريق يجب أن يكون بين 1 و 255 درجة مئوية");
+                return;
+            }
+            const hexValue = toHex(value);
+            currentCommand = `8002999903${hexValue}81`;
+            displayCommand(currentCommand, `تغيير حد إنذار الحريق إلى ${value} درجة مئوية`);
+        }
+
+        function generateFallThresholdCommand() {
+            const value = document.getElementById('fallThreshold').value;
+            if (value < 15 || value > 90) {
+                alert("حد إنذار السقوط يجب أن يكون بين 15 و 90 درجة");
+                return;
+            }
+            const hexValue = toHex(value);
+            currentCommand = `8002999904${hexValue}81`;
+            displayCommand(currentCommand, `تغيير حد إنذار السقوط إلى ${value} درجة`);
+        }
+
+        function generateBatteryThresholdCommand() {
+            const value = document.getElementById('batteryThreshold').value;
+            if (value < 5 || value > 99) {
+                alert("حد إنذار البطارية يجب أن يكون بين 5 و 99%");
+                return;
+            }
+            const hexValue = toHex(value);
+            currentCommand = `8002999905${hexValue}81`;
+            displayCommand(currentCommand, `تغيير حد إنذار البطارية إلى ${value}%`);
+        }
+
+        function generateServerAddressCommand() {
+            const value = document.getElementById('serverAddress').value;
+            if (!value.includes(';')) {
+                alert("يجب أن يحتوي عنوان الخادم على فاصلة منقوطة (;)");
+                return;
+            }
+            currentCommand = `8002999906${value}81`;
+            displayCommand(currentCommand, `تغيير عنوان الخادم إلى ${value}`);
+        }
+
+        function generateAPNCommand() {
+            const value = document.getElementById('apnSettings').value;
+            if (!value.includes(';')) {
+                alert("يجب أن تحتوي إعدادات APN على فاصلة منقوطة (;)");
+                return;
+            }
+            currentCommand = `800299990D${value}81`;
+            displayCommand(currentCommand, `تغيير إعدادات APN إلى ${value}`);
+        }
+
+        function generateMQTTCommand() {
+            const value = document.getElementById('mqttSettings').value;
+            if (!value.includes(';')) {
+                alert("يجب أن تحتوي إعدادات MQTT على فاصلة منقوطة (;)");
+                return;
+            }
+            currentCommand = `800299990A${value}81`;
+            displayCommand(currentCommand, `تغيير إعدادات MQTT إلى ${value}`);
+        }
+
+        function generateFunctionCommand() {
+            const value = document.getElementById('functionSelect').value;
+            currentCommand = `8002999909${value}81`;
+            const optionText = document.getElementById('functionSelect').options[document.getElementById('functionSelect').selectedIndex].text;
+            displayCommand(currentCommand, `تطبيق الإعداد: ${optionText}`);
+        }
+
+        // دالة لعرض الأمر
+        function displayCommand(command, description) {
+            const outputElement = document.getElementById('commandOutput');
+            const hexElement = document.getElementById('commandHex');
+
+            outputElement.innerHTML = `<strong>${description}</strong><br>${command}`;
+            // hexElement.textContent = `HEX: ${command}`;
+        }
+
+        // دالة لنسخ الأمر إلى الحافظة
+        function copyCommand() {
+            if (!currentCommand) {
+                alert("لا يوجد أمر ليتم نسخه. يرجى إنشاء أمر أولاً.");
+                return;
+            }
+
+            // استخدام طريقة Clipboard API الحديثة
+            navigator.clipboard.writeText(currentCommand).then(() => {
+                const alert = document.getElementById('copyAlert');
+                alert.style.display = 'block';
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 2000);
+            }).catch(err => {
+                // إذا فشلت الطريقة الحديثة، نستخدم الطريقة القديمة
+                console.error('Failed to copy: ', err);
+                fallbackCopyTextToClipboard(currentCommand);
+            });
+        }
+
+        // طريقة بديلة للنسخ إذا لم تعمل الطريقة الحديثة
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = 0;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    const alert = document.getElementById('copyAlert');
+                    alert.style.display = 'block';
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 2000);
+                } else {
+                    alert("فشل نسخ الأمر. يرجى المحاولة يدوياً.");
+                }
+            } catch (err) {
+                console.error('Fallback copy failed: ', err);
+                alert("فشل نسخ الأمر. يرجى نسخه يدوياً: " + text);
+            }
+
+            document.body.removeChild(textArea);
+        }
+    </script>
+</body>
+
+</html>
